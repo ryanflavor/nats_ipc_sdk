@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nats-ipc-sdk"
+version = "1.0.0"
+description = "Ultra-lightweight Inter-Process Communication SDK for NATS"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Ryan", email = "ryan@example.com"}
+]
+keywords = ["nats", "ipc", "rpc", "messaging", "microservices"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: System :: Networking",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "nats-py>=2.6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "black>=23.0.0",
+    "mypy>=1.5.0",
+]
+benchmarks = [
+    "numpy>=1.20.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ryan/nats-ipc-sdk"
+Documentation = "https://github.com/ryan/nats-ipc-sdk#readme"
+Repository = "https://github.com/ryan/nats-ipc-sdk.git"
+Issues = "https://github.com/ryan/nats-ipc-sdk/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nats_ipc_sdk*"]
+exclude = ["tests*", "examples*", "benchmarks*"]
