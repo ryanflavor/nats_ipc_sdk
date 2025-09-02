@@ -22,52 +22,63 @@ class CustomData:
 async def main():
     # Server node
     async with IPCNode("server") as server:
-        
         # Register functions with ANY return type
-        await server.register("add", lambda a, b: a + b)
-        await server.register("get_array", lambda size: np.random.rand(size))
-        await server.register("get_object", lambda: CustomData("test"))
-        # Note: Can't return nested lambdas due to pickle limitation
-        # await server.register("get_function", lambda: lambda x: x * 2)
-        
+        def add(a, b):
+            return a + b
+
+        def get_array(size):
+            return np.random.rand(size)
+
+        def get_object():
+            return CustomData("test")
+
+        # Example: Return a multiplier function
+        def create_multiplier(factor):
+            """Creates a multiplier function with the given factor"""
+            return factor * 2
+
         # Async function
         async def async_task(duration):
             await asyncio.sleep(duration)
             return {"status": "completed", "duration": duration}
-        
+
+        await server.register("add", add)
+        await server.register("get_array", get_array)
+        await server.register("get_object", get_object)
+        await server.register("multiply_by_two", create_multiplier)
         await server.register("async_task", async_task)
-        
-        # Client node  
+
+        # Client node
         async with IPCNode("client") as client:  # Will use environment or default
-            
             # Call different return types
             result = await client.call("server", "add", 10, 20)
             print(f"Add: {result}")  # 30
-            
+
             arr = await client.call("server", "get_array", 5)
             print(f"Array: {arr}")  # numpy array
-            
+
             obj = await client.call("server", "get_object")
             print(f"Object value: {obj.value}")  # CustomData object
-            
-            # Function test removed due to pickle limitation
-            # func = await client.call("server", "get_function")
-            # print(f"Function result: {func(5)}")  # 10
-            
+
+            # Call the multiplier function
+            result = await client.call("server", "multiply_by_two", 5)
+            print(f"Multiply by two: 5 * 2 = {result}")
+
             async_result = await client.call("server", "async_task", 0.1)
             print(f"Async: {async_result}")
-            
+
         # Broadcast example
         async with IPCNode("pub") as pub:
             async with IPCNode("sub") as sub:
-                
                 messages = []
                 await sub.subscribe("test", messages.append)
                 await asyncio.sleep(0.1)
-                
-                await pub.broadcast("test", {"any": "data", "numpy": np.array([1,2,3])})
+
+                await pub.broadcast(
+                    "test", {"any": "data", "numpy": np.array([1, 2, 3])}
+                )
                 await asyncio.sleep(0.1)
-                
+
                 print(f"Broadcast received: {messages}")
 
 
