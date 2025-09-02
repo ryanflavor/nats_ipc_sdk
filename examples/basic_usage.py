@@ -1,15 +1,26 @@
 """
 Ultra-minimal usage example
+
+This example demonstrates basic usage of the NATS IPC SDK including:
+- RPC calls with various return types
+- Async method support
+- Broadcast/subscribe patterns
 """
 
 import asyncio
-import os
-import sys
 import numpy as np
 
-# Add parent directory to path if running directly
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from nats_ipc_sdk import IPCNode
+# Clean import approach with fallback
+try:
+    # When running as module: python -m examples.basic_usage
+    from nats_ipc_sdk import IPCNode
+except ImportError:
+    # Fallback for direct execution: python examples/basic_usage.py
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from nats_ipc_sdk import IPCNode
 
 
 # Example: Any Python object/function return type

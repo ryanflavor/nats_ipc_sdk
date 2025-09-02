@@ -4,16 +4,23 @@ Test ultra-thin NATS IPC with deployed cluster (68 & 238)
 """
 
 import asyncio
-import sys
-import os
 import time
 from datetime import datetime
 import numpy as np
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from nats_ipc_sdk import IPCNode
-from config import NATS_CLUSTER_SERVERS, TEST_DELAY
+# Import from parent package - cleaner approach
+try:
+    # When running as a module: python -m tests.test
+    from nats_ipc_sdk import IPCNode
+    from config import NATS_CLUSTER_SERVERS, TEST_DELAY
+except ImportError:
+    # Fallback for direct execution: python tests/test.py
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from nats_ipc_sdk import IPCNode
+    from config import NATS_CLUSTER_SERVERS, TEST_DELAY
 
 
 # Custom class to test pickle serialization
@@ -280,7 +287,7 @@ async def test_performance():
 async def main():
     """Run all tests"""
     print("=" * 60)
-    print("Ultra-Thin NATS IPC SDK Test")
+    print("NATS IPC SDK Test")
     print(f"Time: {datetime.now()}")
     print(f"Cluster: {', '.join(NATS_CLUSTER_SERVERS)}")
     print("=" * 60)
@@ -317,7 +324,7 @@ async def main():
     print(f"\nTotal: {passed}/{total} tests passed")
 
     if passed == total:
-        print("\n🎉 All tests passed! Ultra-thin SDK works perfectly!")
+        print("\n🎉 All tests passed! SDK works perfectly!")
     else:
         print("\n⚠️ Some tests failed")
 

@@ -1,21 +1,33 @@
 #!/usr/bin/env python3
 """
 Performance test client - Run in separate process/machine
-Measures real cross-process/cross-machine latency
+
+Measures real cross-process/cross-machine performance:
+- Latency measurements
+- Throughput testing
+- Concurrent request handling
+- Large data transfer benchmarks
 """
 
 import asyncio
-import sys
-import os
 import time
 import statistics
 import numpy as np
 from datetime import datetime
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from nats_ipc_sdk import IPCNode
-from config import NATS_CLUSTER_SERVERS, PERF_TEST_ITERATIONS, PERF_TEST_WARMUP
+# Clean import approach with fallback
+try:
+    # When running as module: python -m benchmarks.perf_client
+    from nats_ipc_sdk import IPCNode
+    from config import NATS_CLUSTER_SERVERS, PERF_TEST_ITERATIONS, PERF_TEST_WARMUP
+except ImportError:
+    # Fallback for direct execution: python benchmarks/perf_client.py
+    import sys
+    from pathlib import Path
+
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from nats_ipc_sdk import IPCNode
+    from config import NATS_CLUSTER_SERVERS, PERF_TEST_ITERATIONS, PERF_TEST_WARMUP
 
 
 async def measure_latency(
