@@ -6,10 +6,12 @@ import asyncio
 import pickle
 import uuid
 import os
-from typing import Any, Callable, Optional, List, Union
+from typing import Any, Callable, Optional, List, Union, Dict
 
 import nats
 from nats.aio.msg import Msg
+from nats.aio.client import Client
+from nats.aio.subscription import Subscription
 
 # Default timeout from environment or 30 seconds
 DEFAULT_TIMEOUT = float(os.getenv("NATS_TIMEOUT", "30"))
@@ -21,7 +23,7 @@ class IPCNode:
     def __init__(
         self,
         node_id: Optional[str] = None,
-        nats_url: Union[str, List[str]] = None,
+        nats_url: Optional[Union[str, List[str]]] = None,
         timeout: Optional[float] = None
     ):
         self.node_id = node_id or f"node_{uuid.uuid4().hex[:8]}"
@@ -32,9 +34,9 @@ class IPCNode:
                 nats_url = nats_url.split(",")
         self.nats_url = nats_url
         self.timeout = timeout or DEFAULT_TIMEOUT
-        self.nc = None
-        self.methods = {}
-        self.subscriptions = []
+        self.nc: Optional[Client] = None
+        self.methods: Dict[str, Callable] = {}
+        self.subscriptions: List[Subscription] = []
     
     async def connect(self):
         """Connect to NATS"""
@@ -62,6 +64,9 @@ class IPCNode:
     
     async def call(self, target: str, method: str, *args, **kwargs) -> Any:
         """Call remote method"""
+        if not self.nc:
+            raise RuntimeError("Not connected to NATS")
+        
         subject = f"ipc.{target}.{method}"
         request = pickle.dumps({
             "args": args,
@@ -79,10 +84,15 @@ class IPCNode:
     
     async def broadcast(self, channel: str, data: Any):
         """Broadcast data to channel"""
+        if not self.nc:
+            raise RuntimeError("Not connected to NATS")
         await self.nc.publish(f"broadcast.{channel}", pickle.dumps(data))
     
     async def subscribe(self, channel: str, handler: Callable):
         """Subscribe to broadcast channel"""
+        if not self.nc:
+            raise RuntimeError("Not connected to NATS")
+            
         async def wrapper(msg: Msg):
             data = pickle.loads(msg.data)
             if asyncio.iscoroutinefunction(handler):
@@ -95,6 +105,9 @@ class IPCNode:
     
     async def _subscribe_method(self, method_name: str):
         """Setup subscription for a method"""
+        if not self.nc:
+            raise RuntimeError("Not connected to NATS")
+            
         subject = f"ipc.{self.node_id}.{method_name}"
         
         async def handler(msg: Msg):

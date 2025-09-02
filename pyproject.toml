@@ -53,3 +53,9 @@ Issues = "https://github.com/ryan/nats-ipc-sdk/issues"
 where = ["."]
 include = ["nats_ipc_sdk*"]
 exclude = ["tests*", "examples*", "benchmarks*"]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.14.1",
+    "ruff>=0.12.11",
+]
