@@ -106,13 +106,12 @@ async def main():
     print("\n3. Complex Object Performance")
     print("-" * 40)
     
-    class TestObject:
-        def __init__(self, size):
-            self.data = {"key" + str(i): np.random.rand(10) for i in range(size)}
-            self.metadata = {"size": size, "timestamp": time.time()}
-    
     for size in [1, 10, 50]:
-        obj = TestObject(size)
+        # Use a simple dict instead of a class (pickle limitation with local classes)
+        obj = {
+            "data": {"key" + str(i): np.random.rand(10).tolist() for i in range(size)},
+            "metadata": {"size": size, "timestamp": time.time()}
+        }
         stats = await measure_latency(client, "echo", obj, iterations=50)
         print(f"Object with {size:2d} arrays: {stats['mean']:6.2f}ms avg "
               f"(min:{stats['min']:.2f} max:{stats['max']:.2f})")
